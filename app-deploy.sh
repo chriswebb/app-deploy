@@ -68,5 +68,5 @@ if [ $CONFIGFILE ]; then
     fi
 fi
 
-echo "##teamcity[buildStatus status='SUCCESS' text='{build.status.text} application deployed.']";
+echo "##teamcity[buildStatus status='SUCCESS' text='{build.status.text}']";
 exit 0;
