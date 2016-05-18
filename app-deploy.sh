@@ -3,46 +3,66 @@
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <distribution_directory> <deploy_directory> [config file]" 1>&2;
     echo "##teamcity[buildProblem description='Missing parameter options.']";
-    exit 1;
+    exit 0;
 fi
 
-if [ ! -d $1 ]; then
-    echo "Distribution directory '$1' does not exist." 1>&2;
-    echo "##teamcity[buildProblem description='Distribution directory &apos;$1&apos; does not exist.']";
-    exit 1;
-elif ! find "$1" -mindepth 1 -print -quit | grep -q .; then
-    echo "Distribution directory '$1' is empty." 1>&2;
-    echo "##teamcity[buildProblem description='Distribution directory &apos;$1&apos; is empty.']";
-    exit 1;
+DIST_DIR = "$1";
+DEPLOY_DIR = "$2";
+if [ -x "$(which cygpath)" ]; then
+    CYGWIN="true";
 fi
 
-if [ ! -d $2 ]; then
-    echo "Deploy directory '$2' does not exist." 1>&2;
-    echo "##teamcity[buildProblem description='Deploy directory &apos;$2&apos; does not exist.']";
-    exit 1;
+if [ ! -d $DIST_DIR ] && [ $CYGWIN ];
+    DIST_DIR=`cygpath "$DIST_DIR"`;
 fi
 
-if [ $# -gt 2 ] && [ ! -f $3 ]; then
-    echo "Config file '$3' does not exist." 1>&2;
-    echo "##teamcity[buildProblem description='Config file &apos;$3&apos; does not exist.']";
-    exit 1;
-elif [ $# -gt 2 ]; then
+if [ ! -d $DIST_DIR ]; then
+    echo "Distribution directory '$DIST_DIR' does not exist." 1>&2;
+    echo "##teamcity[buildProblem description='Distribution directory $DIST_DIR does not exist.']";
+    exit 0;
+elif ! find "$DIST_DIR" -mindepth 1 -print -quit | grep -q .; then
+    echo "Distribution directory '$DIST_DIR' is empty." 1>&2;
+    echo "##teamcity[buildProblem description='Distribution directory $DIST_DIR is empty.']";
+    exit 0;
+fi
+
+
+if [ ! -d $DEPLOY_DIR ] && [ $CYGWIN ];
+    DEPLOY_DIR=`cygpath "$DEPLOY_DIR"`;
+fi
+
+if [ ! -d $DEPLOY_DIR ]; then
+    echo "Deploy directory '$DEPLOY_DIR' does not exist." 1>&2;
+    echo "##teamcity[buildProblem description='Deploy directory $DEPLOY_DIR does not exist.']";
+    exit 0;
+fi
+
+if [ $# -gt 2 ]; then
     CONFIGFILE="$3";
+    if [ ! -f $CONFIGFILE ] && [ $CYGWIN ];
+        CONFIGFILE=`cygpath "$CONFIGFILE"`;
+    fi
+
+    if [ ! -f $CONFIGFILE ]; then
+        echo "Config file '$CONFIGFILE' does not exist." 1>&2;
+        echo "##teamcity[buildProblem description='Config file $CONFIGFILE does not exist.']";
+        exit 0;
+    fi
 fi
 
 echo "##teamcity[progressMessage 'Copying files from the distribution folder to the deployment folder.']";
-if ! cp "$1"/* "$2"; then
+if ! cp "$DIST_DIR"/* "$DEPLOY_DIR"; then
     echo "Error occurred while copying files from the distribution folder to the deployment folder." 1>&2;
     echo "##teamcity[buildProblem description='Error occurred while copying files from the distribution folder to the deployment folder.']";
-    exit 1;
+    exit 0;
 fi
 
 if [ $CONFIGFILE ]; then
     echo "##teamcity[progressMessage 'Copying config file to the deployment folder.']";
-    if ! cp "$CONFIGFILE" "$2"; then
+    if ! cp "$CONFIGFILE" "$DEPLOY_DIR"; then
         echo "Error occurred while copying config file to the deployment folder." 1>&2;
         echo "##teamcity[buildProblem description='Error occurred while copying config file to the deployment folder.']";
-        exit 1;
+        exit 0;
     fi
 fi
 
