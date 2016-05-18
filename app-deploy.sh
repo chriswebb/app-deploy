@@ -6,14 +6,16 @@ if [ $# -lt 2 ]; then
     exit 0;
 fi
 
-DIST_DIR = "$1";
-DEPLOY_DIR = "$2";
-if [ -x "$(which cygpath)" ]; then
+DIST_DIR="$1";
+DEPLOY_DIR="$2";
+CYGPATH="$(/usr/bin/which cygpath)";
+
+if [ -x $CYGPATH ]; then
     CYGWIN="true";
 fi
 
-if [ ! -d $DIST_DIR ] && [ $CYGWIN ];
-    DIST_DIR=`cygpath "$DIST_DIR"`;
+if [ ! -d $DIST_DIR ] && [ $CYGWIN ]; then
+    DIST_DIR=`$CYGPATH "$DIST_DIR"`;
 fi
 
 if [ ! -d $DIST_DIR ]; then
@@ -27,8 +29,8 @@ elif ! find "$DIST_DIR" -mindepth 1 -print -quit | grep -q .; then
 fi
 
 
-if [ ! -d $DEPLOY_DIR ] && [ $CYGWIN ];
-    DEPLOY_DIR=`cygpath "$DEPLOY_DIR"`;
+if [ ! -d $DEPLOY_DIR ] && [ $CYGWIN ]; then
+    DEPLOY_DIR=`$CYGPATH "$DEPLOY_DIR"`;
 fi
 
 if [ ! -d $DEPLOY_DIR ]; then
@@ -39,8 +41,8 @@ fi
 
 if [ $# -gt 2 ]; then
     CONFIGFILE="$3";
-    if [ ! -f $CONFIGFILE ] && [ $CYGWIN ];
-        CONFIGFILE=`cygpath "$CONFIGFILE"`;
+    if [ ! -f $CONFIGFILE ] && [ $CYGWIN ]; then
+        CONFIGFILE=`$CYGPATH "$CONFIGFILE"`;
     fi
 
     if [ ! -f $CONFIGFILE ]; then
