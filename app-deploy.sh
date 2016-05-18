@@ -53,7 +53,7 @@ if [ $# -gt 2 ]; then
 fi
 
 echo "##teamcity[progressMessage 'Copying files from the distribution folder to the deployment folder.']";
-if ! cp "$DIST_DIR"/* "$DEPLOY_DIR"; then
+if ! cp -R "$DIST_DIR"/* "$DEPLOY_DIR"; then
     echo "Error occurred while copying files from the distribution folder to the deployment folder." 1>&2;
     echo "##teamcity[buildProblem description='Error occurred while copying files from the distribution folder to the deployment folder.']";
     exit 0;
